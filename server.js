@@ -6,9 +6,15 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: ["http://localhost:5173", "http://127.0.0.1:5173"] }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  process.env.CLIENT_ORIGIN,
+].filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: "50mb" })); // large limit for base64 images
 
 // ── SQLite setup ──────────────────────────────────────────────────────────
