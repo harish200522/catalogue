@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const API = import.meta.env.VITE_API_URL ?? "";
-
 // ── Context ───────────────────────────────────────────────────────────────
 export const ProductContext = createContext(null);
 
@@ -11,7 +9,7 @@ export function ProductProvider({ children }) {
 
   // ── Load all products from server on mount ───────────────────────────
   useEffect(() => {
-    fetch(`${API}/api/products`)
+    fetch("/api/products")
       .then((r) => r.json())
       .then((data) => { setProducts(data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -23,7 +21,7 @@ export function ProductProvider({ children }) {
     const tempId = `tmp_${Date.now()}`;
     setProducts((prev) => [{ ...productData, id: tempId }, ...prev]);
 
-    fetch(`${API}/api/products`, {
+    fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(productData),
@@ -39,7 +37,7 @@ export function ProductProvider({ children }) {
     // Optimistic update
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
 
-    fetch(`${API}/api/products/${id}`, {
+    fetch(`/api/products/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -52,7 +50,7 @@ export function ProductProvider({ children }) {
 
   const deleteProduct = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    fetch(`${API}/api/products/${id}`, { method: "DELETE" });
+    fetch(`/api/products/${id}`, { method: "DELETE" });
   };
 
   // ── Derive per-category list ─────────────────────────────────────────

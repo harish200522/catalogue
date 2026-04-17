@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const API = import.meta.env.VITE_API_URL ?? "";
-
 const DEFAULTS = {
   whatsappNumber: "919791639162",
   instagramLink:
@@ -15,7 +13,7 @@ export function SettingsProvider({ children }) {
 
   // ── Load from server on mount ────────────────────────────────────────
   useEffect(() => {
-    fetch(`${API}/api/settings`)
+    fetch("/api/settings")
       .then((r) => r.json())
       .then((data) => setSettings({ ...DEFAULTS, ...data }))
       .catch(() => {}); // keep defaults if server unreachable
@@ -24,7 +22,7 @@ export function SettingsProvider({ children }) {
   // ── Optimistic update + server sync ─────────────────────────────────
   const updateSettings = (partial) => {
     setSettings((prev) => ({ ...prev, ...partial }));
-    fetch(`${API}/api/settings`, {
+    fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(partial),
