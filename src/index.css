@@ -1,0 +1,328 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --color-primary: #111111;
+  --color-secondary: #6b7280;
+  --color-surface: #fafafa;
+  --color-muted: #f5f5f5;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: "Inter", sans-serif;
+    color: #111;
+    background: #F5F1EC;
+  }
+
+  ::selection {
+    background: #111;
+    color: #fff;
+  }
+}
+
+@keyframes float3d {
+  0%, 100% {
+    transform: perspective(500px) rotateY(0deg) translateY(0px);
+  }
+  25% {
+    transform: perspective(500px) rotateY(8deg) translateY(-3px);
+  }
+  50% {
+    transform: perspective(500px) rotateY(0deg) translateY(-5px);
+  }
+  75% {
+    transform: perspective(500px) rotateY(-8deg) translateY(-3px);
+  }
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes heroZoom {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes contentRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-image {
+  animation:
+    heroFadeIn 1.4s ease-out forwards,
+    heroZoom 8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.hero-content {
+  animation: contentRise 1.2s ease-out 0.6s both;
+  will-change: transform, opacity;
+}
+
+/* ── Floating WhatsApp Button ── */
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0.45); }
+  60%       { box-shadow: 0 0 0 12px rgba(37,211,102,0); }
+}
+
+.floating-wa {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25D366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  animation: wa-pulse 2.4s ease-out infinite;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.floating-wa:hover {
+  transform: scale(1.1);
+  background: #20c25c;
+  animation: none;
+  box-shadow: 0 6px 28px rgba(37,211,102,0.55);
+}
+
+/* ── Instagram Button (UIverse by andrew-demchenk0) ── */
+@keyframes insta-slide {
+  0%, 15%    { transform: translateX(0); }
+  40%, 65%   { transform: translateX(122px); }
+  85%, 100%  { transform: translateX(0); }
+}
+@keyframes insta-text-slide {
+  0%, 15%    { transform: translateX(0); }
+  40%, 65%   { transform: translateX(108px); }
+  85%, 100%  { transform: translateX(0); }
+}
+
+.insta-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 160px;
+  height: 38px;
+  border-radius: 30px;
+  background-color: white;
+  border: 1px #FFB700 solid;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.insta-text1 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 22%;
+  color: #111;
+  white-space: nowrap;
+}
+
+.insta-text2 {
+  position: absolute;
+  top: 25%;
+  left: -60px;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  white-space: nowrap;
+  animation: insta-text-slide 3s ease-in-out infinite;
+}
+
+.insta-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  animation: insta-slide 3s ease-in-out infinite;
+}
+
+.insta-icon::before {
+  position: absolute;
+  left: -122px;
+  top: 0;
+  z-index: -1;
+  content: '';
+  width: 160px;
+  height: 36px;
+  border-radius: 30px;
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
+
+.insta-btn:active {
+  transform: scale(1.03);
+}
+
+/* ── WhatsApp Button (UIverse by andrew-demchenk0, WhatsApp variant) ── */
+.wa-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 160px;
+  height: 38px;
+  border-radius: 30px;
+  background-color: white;
+  border: 1px #25D366 solid;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+@keyframes wa-slide {
+  0%, 15%    { transform: translateX(0); }
+  40%, 65%   { transform: translateX(122px); }
+  85%, 100%  { transform: translateX(0); }
+}
+@keyframes wa-text-slide {
+  0%, 15%    { transform: translateX(0); }
+  40%, 65%   { transform: translateX(108px); }
+  85%, 100%  { transform: translateX(0); }
+}
+
+.wa-text1 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 22%;
+  color: #111;
+  white-space: nowrap;
+}
+
+.wa-text2 {
+  position: absolute;
+  top: 25%;
+  left: -60px;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  white-space: nowrap;
+  animation: wa-text-slide 3s ease-in-out infinite;
+}
+
+.wa-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  animation: wa-slide 3s ease-in-out infinite;
+}
+
+.wa-icon::before {
+  position: absolute;
+  left: -122px;
+  top: 0;
+  z-index: -1;
+  content: '';
+  width: 160px;
+  height: 36px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
+.wa-btn:active {
+  transform: scale(1.03);
+}
+
+/* ── Hamburger Button (UIverse by dugepard, scaled for header) ── */
+.check {
+  display: none;
+}
+
+.hamburger-button {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.hamburger-button div {
+  width: 28px;
+  height: 3px;
+  background-color: var(--hamburger-color, #222);
+  border-radius: 3px;
+  position: absolute;
+  transition: 0.4s;
+}
+
+.line1 { top: 0; }
+.line2 { top: calc(40%); }
+.line3 { top: calc(80%); }
+
+.hamburger-button:hover div {
+  width: 54.2857143%;
+}
+
+.hamburger-button:hover .line1 {
+  transform: translate(13px, 5px) rotate(35deg);
+  border-radius: 4px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.hamburger-button:hover .line3 {
+  transform: translate(13px, -5px) rotate(-35deg);
+  border-radius: 4px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.check:checked ~ .hamburger-button:hover .line1 {
+  transform: translate(0, 5px) rotate(-35deg);
+  border-radius: 4px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.check:checked ~ .hamburger-button:hover .line3 {
+  transform: translate(0, -5px) rotate(35deg);
+  border-radius: 4px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.check:checked ~ .hamburger-button:hover .line2 {
+  margin-left: 13px;
+}
