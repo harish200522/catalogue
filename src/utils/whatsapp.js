@@ -1,21 +1,26 @@
 const DEFAULT_WA_NUMBER = "919791639162";
 
 /**
- * Returns the first public image URL from a product, or null if none found.
- * Rejects base64 strings, localhost, and non-http URLs.
+ * Returns true only for public, non-base64 image URLs.
+ */
+function isValidImageUrl(url) {
+  if (typeof url !== "string") return false;
+  if (url.startsWith("data:image")) return false;
+  if (!url.startsWith("http")) return false;
+  if (url.includes("localhost") || url.includes("127.0.0.1")) return false;
+  return true;
+}
+
+/**
+ * Returns the first valid public image URL from a product, or null.
  */
 function getPublicImageUrl(product) {
   const images = Array.isArray(product.images) ? product.images : [];
   const candidates = product.image ? [...images, product.image] : images;
   for (const url of candidates) {
-    if (
-      typeof url === "string" &&
-      url.startsWith("http") &&
-      !url.startsWith("data:") &&
-      !url.includes("localhost") &&
-      !url.includes("127.0.0.1")
-    ) {
-      return url;
+    if (isValidImageUrl(url)) return url;
+    if (typeof url === "string" && url.startsWith("data:image")) {
+      console.warn("[WhatsApp] Skipping base64 image — not suitable for WA preview.");
     }
   }
   return null;
@@ -41,8 +46,7 @@ export function generateWhatsAppLink(product, waNumber = DEFAULT_WA_NUMBER) {
   lines.push(``);
   lines.push(`Please share more details.`);
 
-  const message = lines.join("\n");
-  return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${waNumber}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
 export function generalWhatsAppLink(waNumber = DEFAULT_WA_NUMBER) {
