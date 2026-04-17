@@ -32,6 +32,9 @@ export default function AdminPage() {
   const [filterCat, setFilterCat]       = useState("all");
   const [errors, setErrors]             = useState({});
 
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
   const fileInputRef = useRef(null);
 
   // Auth guard
@@ -41,14 +44,32 @@ export default function AdminPage() {
   }
 
   // ── Image upload ────────────────────────────────────────────────────────
-  const handleImageUpload = (e) => {
-    Array.from(e.target.files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) =>
-        setForm((f) => ({ ...f, images: [...f.images, ev.target.result] }));
-      reader.readAsDataURL(file);
-    });
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
     e.target.value = "";
+    if (!files.length) return;
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const urls = await Promise.all(
+        files.map(async (file) => {
+          const formData = new FormData();
+          formData.append("image", file);
+          const res = await fetch("/api/upload-image", { method: "POST", body: formData });
+          if (!res.ok) throw new Error(await res.text());
+          const { imageUrl } = await res.json();
+          return imageUrl;
+        })
+      );
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
+    } catch (err) {
+      setUploadError("Upload failed. Please try again.");
+      console.error("[Upload]", err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeImage = (idx) =>
@@ -427,19 +448,36 @@ export default function AdminPage() {
                   {/* Image Upload */}
                   <Field label="Product Images" error={errors.images}>
                     <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`flex flex-col items-center justify-center gap-2 w-full min-h-[108px] border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
-                        errors.images
-                          ? "border-red-300 bg-red-50/30"
-                          : "border-gray-200 hover:border-[#8B2252]/45 hover:bg-[#8B2252]/[0.02] bg-gray-50/60"
+                      onClick={() => !uploading && fileInputRef.current?.click()}
+                      className={`flex flex-col items-center justify-center gap-2 w-full min-h-[108px] border-2 border-dashed rounded-xl transition-all duration-200 ${
+                        uploading
+                          ? "border-[#8B2252]/30 bg-[#8B2252]/[0.03] cursor-wait"
+                          : errors.images
+                          ? "border-red-300 bg-red-50/30 cursor-pointer"
+                          : "border-gray-200 hover:border-[#8B2252]/45 hover:bg-[#8B2252]/[0.02] bg-gray-50/60 cursor-pointer"
                       }`}
                     >
-                      <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                      </svg>
-                      <p className="text-xs text-gray-400 font-medium">Click to upload images</p>
-                      <p className="text-[10px] text-gray-300">PNG, JPG, WEBP — multiple allowed</p>
+                      {uploading ? (
+                        <>
+                          <svg className="w-6 h-6 text-[#8B2252] animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                          </svg>
+                          <p className="text-xs text-[#8B2252] font-medium">Uploading to Cloudinary…</p>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                          </svg>
+                          <p className="text-xs text-gray-400 font-medium">Click to upload images</p>
+                          <p className="text-[10px] text-gray-300">PNG, JPG, WEBP — multiple allowed</p>
+                        </>
+                      )}
                     </div>
+                    {uploadError && (
+                      <p className="text-xs text-red-500 mt-1">{uploadError}</p>
+                    )}
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -478,8 +516,12 @@ export default function AdminPage() {
                       ))}
                       {/* Add more tile */}
                       <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-16 h-20 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-[#8B2252]/50 transition-colors duration-200 shrink-0"
+                        onClick={() => !uploading && fileInputRef.current?.click()}
+                        className={`w-16 h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-colors duration-200 shrink-0 ${
+                          uploading
+                            ? "border-gray-100 cursor-wait opacity-50"
+                            : "border-gray-200 cursor-pointer hover:border-[#8B2252]/50"
+                        }`}
                       >
                         <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -493,7 +535,8 @@ export default function AdminPage() {
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 py-2.5 rounded-lg bg-[#0f0f0f] text-white text-sm font-medium hover:bg-[#8B2252] transition-colors duration-200"
+                      disabled={uploading}
+                      className="flex-1 py-2.5 rounded-lg bg-[#0f0f0f] text-white text-sm font-medium hover:bg-[#8B2252] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {editingId ? "Save Changes" : "Add Product"}
                     </button>

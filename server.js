@@ -2,6 +2,9 @@ import "dotenv/config";
 import express from "express";
 import pg from "pg";
 import cors from "cors";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
 
 const { Pool } = pg;
 
@@ -21,6 +24,38 @@ app.use(express.json({ limit: "50mb" }));
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+});
+
+// ── Cloudinary config ─────────────────────────────────────────────────────
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// ── Multer — memory storage (no disk writes) ──────────────────────────────
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"), false);
+  },
+});
+
+// ── Image upload route ────────────────────────────────────────────────────
+app.post("/api/upload-image", upload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file received" });
+
+  const stream = cloudinary.uploader.upload_stream(
+    { folder: "inout-fashion", transformation: [{ width: 800, crop: "limit", quality: "auto", fetch_format: "auto" }] },
+    (error, result) => {
+      if (error) return res.status(500).json({ error: error.message });
+      res.json({ imageUrl: result.secure_url });
+    }
+  );
+
+  Readable.from(req.file.buffer).pipe(stream);
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────
