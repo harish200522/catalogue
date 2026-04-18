@@ -1,12 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import ProductCard from "./ProductCard";
 
-function ProductSkeleton() {
+function ProductCardSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="aspect-[3/4] rounded-2xl bg-gray-200 mb-3" />
-      <div className="h-3 bg-gray-200 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-gray-200 rounded w-1/3" />
+    <div>
+      {/* Image block */}
+      <div className="aspect-[3/4] rounded-2xl skeleton-shimmer mb-4" />
+      {/* Info lines */}
+      <div className="space-y-2 px-1">
+        <div className="h-3 rounded skeleton-shimmer w-3/4" />
+        <div className="flex items-center justify-between">
+          <div className="h-3.5 rounded skeleton-shimmer w-1/3" />
+          <div className="h-2.5 rounded skeleton-shimmer w-1/4" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -48,7 +55,7 @@ export default function CategorySection({ id, label, items, loading }) {
       {/* Product Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
         {loading
-          ? Array.from({ length: 5 }).map((_, i) => <ProductSkeleton key={i} />)
+          ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
           : items.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B0000"/>
+      <stop offset="50%" style="stop-color:#C0002A"/>
+      <stop offset="100%" style="stop-color:#8B0000"/>
+    </linearGradient>
+    <pattern id="lines" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="20" x2="20" y2="0" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Texture overlay -->
+  <rect width="1200" height="630" fill="url(#lines)"/>
+  <!-- Dark vignette edges -->
+  <rect width="1200" height="630" fill="rgba(0,0,0,0.18)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="4" fill="rgba(255,255,255,0.15)"/>
+  <!-- Bottom accent line -->
+  <rect x="0" y="626" width="1200" height="4" fill="rgba(255,255,255,0.10)"/>
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="6" height="630" fill="rgba(255,255,255,0.25)"/>
+
+  <!-- Brand name -->
+  <text
+    x="600" y="250"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="96"
+    font-weight="700"
+    letter-spacing="18"
+    fill="white"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >INOUT FASHION</text>
+
+  <!-- Divider line -->
+  <rect x="400" y="285" width="400" height="1.5" fill="rgba(255,255,255,0.35)"/>
+
+  <!-- Tagline -->
+  <text
+    x="600" y="340"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="26"
+    font-weight="400"
+    letter-spacing="6"
+    fill="rgba(255,255,255,0.80)"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >PREMIUM WHOLESALE CLOTHING</text>
+
+  <!-- Sub tagline -->
+  <text
+    x="600" y="400"
+    font-family="Arial, sans-serif"
+    font-size="18"
+    font-weight="300"
+    letter-spacing="3"
+    fill="rgba(255,255,255,0.55)"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >T-Shirts · Shirts · Pants · Shorts · Tracks · Pan India Delivery</text>
+
+  <!-- Bottom label -->
+  <text
+    x="600" y="560"
+    font-family="Arial, sans-serif"
+    font-size="16"
+    letter-spacing="4"
+    fill="rgba(255,255,255,0.35)"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >inoutfashioncatalogue.netlify.app</text>
+</svg>
