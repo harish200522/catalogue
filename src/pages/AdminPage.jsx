@@ -239,17 +239,17 @@ export default function AdminPage() {
                 <IconArrow /> Back
               </button>
             )}
-            {/* Mobile logout */}
+            {/* Mobile logout — now in bottom nav, hide here */}
             <button
               onClick={handleLogout}
-              className="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg text-red-400 text-xs font-medium hover:bg-red-50 transition-colors duration-200"
+              className="hidden"
             >
               <IconLogout />
             </button>
           </div>
         </header>
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 pb-24 md:pb-6">
 
           {/* ── PRODUCT LIST ─────────────────────────────────────────── */}
           {view === "list" && (
@@ -621,6 +621,52 @@ export default function AdminPage() {
       )}
 
     </div>
+
+      {/* ── Mobile bottom nav ─────────────────────────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[200] bg-[#0f0f0f] border-t border-white/10 flex items-stretch h-16">
+        <button
+          onClick={() => setView("list")}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-widest uppercase transition-colors duration-200 ${
+            view === "list" ? "text-[#c0406e]" : "text-white/40"
+          }`}
+        >
+          <IconList />
+          <span>Products</span>
+        </button>
+        <button
+          onClick={openAdd}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-widest uppercase transition-colors duration-200 ${
+            view === "form" && !editingId ? "text-[#c0406e]" : "text-white/40"
+          }`}
+        >
+          <IconPlus />
+          <span>Add</span>
+        </button>
+        <button
+          onClick={() => setView("settings")}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-widest uppercase transition-colors duration-200 ${
+            view === "settings" ? "text-[#c0406e]" : "text-white/40"
+          }`}
+        >
+          <IconSettings />
+          <span>Settings</span>
+        </button>
+        <a
+          href="/"
+          className="flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-widest uppercase text-white/40 transition-colors duration-200"
+        >
+          <IconArrow />
+          <span>Site</span>
+        </a>
+        <button
+          onClick={handleLogout}
+          className="flex-1 flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-widest uppercase text-red-400/60 transition-colors duration-200"
+        >
+          <IconLogout />
+          <span>Logout</span>
+        </button>
+      </nav>
+
     </PageTransition>
   );
 }
