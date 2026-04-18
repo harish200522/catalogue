@@ -5,7 +5,7 @@
 # Proxy /api/* to Render backend — avoids CORS entirely
 [[redirects]]
   from = "/api/*"
-  to = "https://catalogue-26cn.onrender.com/api/:splat"
+  to = "https://catalogue-production-91fe.up.railway.app/api/:splat"
   status = 200
   force = true
 
