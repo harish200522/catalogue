@@ -167,7 +167,7 @@ function App() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<HomePage />} />
         <Route path="/category/:categoryKey" element={<CategoryPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/inout" element={<AdminPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
     </AnimatePresence>

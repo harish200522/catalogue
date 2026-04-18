@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn) navigate("/admin", { replace: true });
+    if (isLoggedIn) navigate("/inout", { replace: true });
   }, [isLoggedIn, navigate]);
 
   const handleSubmit = (e) => {
@@ -26,7 +26,7 @@ export default function LoginPage() {
     setTimeout(() => {
       const result = login(form.username.trim(), form.password);
       if (result.success) {
-        navigate("/admin", { replace: true });
+        navigate("/inout", { replace: true });
       } else {
         setError(result.error);
         setLoading(false);
