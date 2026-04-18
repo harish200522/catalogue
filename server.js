@@ -228,23 +228,20 @@ app.put("/api/settings", async (req, res) => {
   }
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────
-initDb()
-  .then(() => {
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      console.log(`INOUT Fashion API  →  http://0.0.0.0:${PORT}`);
-    });
-    server.on("error", (err) => {
-      if (err.code === "EADDRINUSE") {
-        console.error(`Port ${PORT} already in use.`);
-        process.exit(0);
-      } else {
-        console.error("Server error:", err);
-        process.exit(1);
-      }
-    });
-  })
-  .catch((err) => {
-    console.error("DB init failed:", err);
+// ── Start: listen first, then init DB ────────────────────────────────────
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`INOUT Fashion API  →  http://0.0.0.0:${PORT}`);
+  initDb()
+    .then(() => console.log("DB ready."))
+    .catch((err) => console.error("DB init failed:", err));
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} already in use.`);
+    process.exit(0);
+  } else {
+    console.error("Server error:", err);
     process.exit(1);
-  });
+  }
+});
