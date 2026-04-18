@@ -68,61 +68,41 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
   }
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50">
-      {/* Main Header Bar */}
-      <div
-        className={`w-full relative overflow-hidden transition-all duration-300 ease-out ${
-          scrolled ? "shadow-lg" : "shadow-none"
-        }`}
-        style={{ background: scrolled ? "linear-gradient(90deg, #0f0f0f 0%, #1a0d0d 50%, #0f0f0f 100%)" : "transparent" }}
-      >
-        <div
-          className={`relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 transition-all duration-300 ${
-            scrolled ? "h-14" : "h-16 md:h-20"
+    <header className="fixed top-0 left-0 w-full z-50 shadow-lg" style={{ background: "linear-gradient(90deg, #0f0f0f 0%, #1a0d0d 50%, #0f0f0f 100%)" }}>
+      <div className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 h-14">
+        {/* Hamburger */}
+        <div className="relative ml-2">
+          <input
+            type="checkbox"
+            className="check"
+            id="header-menu-check"
+            checked={menuOpen}
+            onChange={onMenuToggle}
+          />
+          <label
+            className="hamburger-button"
+            htmlFor="header-menu-check"
+            style={{ "--hamburger-color": "white" }}
+          >
+            <div className="line1" />
+            <div className="line2" />
+            <div className="line3" />
+          </label>
+        </div>
+
+        {/* Tagline — centred */}
+        <p
+          className={`absolute left-1/2 -translate-x-1/2 text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-light pointer-events-none text-white/70 transition-opacity duration-500 ${
+            taglineFade ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* Hamburger */}
-          <div className="relative ml-2">
-            <input
-              type="checkbox"
-              className="check"
-              id="header-menu-check"
-              checked={menuOpen}
-              onChange={onMenuToggle}
-            />
-            <label
-              className="hamburger-button"
-              htmlFor="header-menu-check"
-              style={{ "--hamburger-color": "white" }}
-            >
-              <div className="line1" />
-              <div className="line2" />
-              <div className="line3" />
-            </label>
-          </div>
+          {taglines[taglineIndex]}
+        </p>
 
-          {/* Tagline — centred, only when scrolled */}
-          {scrolled && (
-            <p
-              className={`absolute left-1/2 -translate-x-1/2 text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-light pointer-events-none text-white/80 transition-opacity duration-500 ${
-                taglineFade ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              {taglines[taglineIndex]}
-            </p>
-          )}
-
-          {/* Logo — right side */}
-          <a href="#" className="block">
-            <img
-              src="/logo.jpeg"
-              alt="INOUT Logo"
-              className={`w-auto object-contain transition-all duration-300 ${
-                scrolled ? "h-10 md:h-12" : "h-14 md:h-16"
-              }`}
-            />
-          </a>
-        </div>
+        {/* Logo — right side */}
+        <a href="#" className="block">
+          <img src="/logo.jpeg" alt="INOUT Logo" className="h-10 w-auto object-contain" />
+        </a>
       </div>
     </header>
   );
