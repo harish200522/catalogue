@@ -22,6 +22,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const { isLoggedIn, logout } = useAuth();
   const { products: items, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { settings } = useSettings();
   const [view, setView]           = useState("list"); // "list" | "form" | "password" | "settings"
   const [form, setForm]           = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -176,7 +177,7 @@ export default function AdminPage() {
               className="text-white font-bold text-lg tracking-[0.15em] uppercase"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
             >
-              INOUT
+              {settings.siteName || "INOUT"}
             </p>
           </div>
           <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">Admin Panel</p>
@@ -217,7 +218,7 @@ export default function AdminPage() {
             {/* Mobile brand */}
             <img src="/logo.jpeg" alt="INOUT Logo" className="md:hidden h-7 w-7 object-contain rounded" />
             <span className="md:hidden font-bold text-sm tracking-widest uppercase text-[#0f0f0f]"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}>INOUT Admin</span>
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}>{settings.siteName || "INOUT Admin"}</span>
             <span className="hidden md:block text-sm font-medium text-gray-700">
               {view === "form" ? (editingId ? "Edit Product" : "Add Product") : view === "settings" ? "Settings" : "All Products"}
             </span>
@@ -754,9 +755,92 @@ function IconSettings() {
 function SettingsView() {
   return (
     <div className="max-w-lg mx-auto space-y-6">
+      <SiteNameCard />
       <WhatsAppCard />
       <InstagramCard />
       <ChangePasswordCard />
+    </div>
+  );
+}
+
+// ── Site Name Card ───────────────────────────────────────────────────────
+function SiteNameCard() {
+  const { settings, updateSettings } = useSettings();
+  const { verifyPassword } = useAuth();
+  const [name, setName]       = useState(settings.siteName || "INOUT Admin");
+  const [pwd, setPwd]         = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [nameErr, setNameErr] = useState("");
+  const [pwdErr, setPwdErr]   = useState("");
+  const [saved, setSaved]     = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let hasErr = false;
+    if (!name.trim()) { setNameErr("Site name cannot be empty"); hasErr = true; }
+    if (!pwd) { setPwdErr("Password is required to change the site name"); hasErr = true; }
+    if (hasErr) return;
+    if (!verifyPassword(pwd)) { setPwdErr("Incorrect password"); return; }
+    updateSettings({ siteName: name.trim() });
+    setPwd("");
+    setPwdErr("");
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(139,34,82,0.08)" }}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#8B2252" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-800">Admin Site Name</h3>
+          <p className="text-[11px] text-gray-400">Shown in the admin header. Password required to change.</p>
+        </div>
+      </div>
+
+      {saved && <SuccessBanner msg="Site name updated!" />}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Site Name" error={nameErr}>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setNameErr(""); setSaved(false); }}
+            placeholder="e.g. INOUT Admin"
+            className={inputCls(nameErr)}
+          />
+        </Field>
+        <Field label="Confirm with Password" error={pwdErr}>
+          <div className="relative">
+            <input
+              type={showPwd ? "text" : "password"}
+              value={pwd}
+              onChange={(e) => { setPwd(e.target.value); setPwdErr(""); }}
+              placeholder="Enter admin password"
+              className={inputCls(pwdErr) + " pr-10"}
+            />
+            <button type="button" onClick={() => setShowPwd((s) => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showPwd ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </Field>
+        <SaveBtn />
+      </form>
     </div>
   );
 }

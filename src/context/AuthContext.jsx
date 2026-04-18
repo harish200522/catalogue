@@ -41,8 +41,10 @@ export function AuthProvider({ children }) {
     return { success: true };
   };
 
+  const verifyPassword = (pwd) => pwd === getStoredPassword();
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, changePassword }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, changePassword, verifyPassword }}>
       {children}
     </AuthContext.Provider>
   );

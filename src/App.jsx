@@ -32,7 +32,7 @@ function HomePage() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-[#F5F1EC] pt-14">
+    <div className="min-h-screen bg-[#F5F1EC]">
       <Header menuOpen={menuOpen} onMenuToggle={() => setMenuOpen(o => !o)} />
       <SidebarMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
       <HeroSection />

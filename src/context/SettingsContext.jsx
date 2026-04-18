@@ -4,6 +4,7 @@ const DEFAULTS = {
   whatsappNumber: "919791639162",
   instagramLink:
     "https://www.instagram.com/inout_fashions_showroom?igsh=MTMyaDlxcGt3MjA4cQ==",
+  siteName: "INOUT Admin",
 };
 
 export const SettingsContext = createContext(null);
