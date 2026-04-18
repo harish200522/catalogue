@@ -250,8 +250,8 @@ export default function ProductCard({ product }) {
           <span className="text-sm font-bold text-[#111]">
             ₹{product.price}
           </span>
-          <span className="text-[10px] text-gray-500 tracking-widest uppercase">
-            {product.quantity}
+          <span className="text-[12px]" style={{ color: "#888" }}>
+            Min. qty: {product.quantity}
           </span>
         </div>
         {/* Bottom accent line — grows on hover */}

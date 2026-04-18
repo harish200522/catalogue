@@ -77,47 +77,22 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
             : "max-h-0 opacity-0"
         }`}
       >
-        {/* Match hero image background */}
-        <div
-          className="absolute inset-0 bg-cover bg-no-repeat"
-          style={{ backgroundImage: "url('/hero-bg.jpeg')", backgroundPosition: "center 20%" }}
-        />
-        <div className="absolute inset-0 bg-white/15 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-white" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 py-1.5 flex items-center justify-center">
           <p
-            className={`text-[11px] md:text-xs tracking-[0.2em] uppercase text-white/90 font-light transition-opacity duration-500 ease-in-out ${
+            className={`text-[11px] md:text-xs tracking-[0.2em] uppercase font-medium transition-opacity duration-500 ease-in-out ${
               taglineFade ? "opacity-100" : "opacity-0"
             }`}
+            style={{ color: "#8B2252" }}
           >
             {taglines[taglineIndex]}
           </p>
         </div>
       </div>
 
-      {/* Main Header Bar */}
-      <div
-        className={`w-full relative overflow-hidden transition-all duration-300 ease-out ${
-          scrolled ? "shadow-sm" : "shadow-none"
-        }`}
-      >
-        {/* Background image — visible only when scrolled */}
-        <div
-          className={`absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-300 ${
-            scrolled ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ backgroundImage: "url('/hero-bg.jpeg')", backgroundPosition: "center center" }}
-        />
-        {/* Frosted overlay when scrolled */}
-        <div
-          className={`absolute inset-0 transition-all duration-300 ${
-            scrolled ? "bg-white/15 backdrop-blur-[2px]" : "bg-transparent"
-          }`}
-        />
-        <div
-          className={`relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 transition-all duration-300 ${
-            scrolled ? "h-14" : "h-16 md:h-20"
-          }`}
-        >
+      {/* Main Header Bar — always white, always visible */}
+      <div className="w-full bg-white border-b border-[#eee]">
+        <div className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 h-14">
           {/* Hamburger — checkbox+label UIverse button */}
           <div className="relative ml-2">
             <input
@@ -130,7 +105,7 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
             <label
               className="hamburger-button"
               htmlFor="header-menu-check"
-              style={{ "--hamburger-color": scrolled ? "#111" : "white" }}
+              style={{ "--hamburger-color": "#111" }}
             >
               <div className="line1" />
               <div className="line2" />
@@ -143,9 +118,7 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
             <img
               src="/logo.jpeg"
               alt="INOUT Logo"
-              className={`w-auto object-contain transition-all duration-300 ${
-                scrolled ? "h-10 md:h-12" : "h-14 md:h-16"
-              }`}
+              className="w-auto object-contain h-10"
             />
           </a>
         </div>

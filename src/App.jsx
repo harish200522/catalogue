@@ -32,7 +32,7 @@ function HomePage() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-[#F5F1EC]">
+    <div className="min-h-screen bg-[#F5F1EC] pt-14">
       <Header menuOpen={menuOpen} onMenuToggle={() => setMenuOpen(o => !o)} />
       <SidebarMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
       <HeroSection />
@@ -53,7 +53,7 @@ function HomePage() {
       </main>
 
       {/* Footer */}
-        <footer className="mt-20 sm:mt-24" style={{ background: "linear-gradient(160deg, #0f0f0f 0%, #1a0d0d 60%, #0f0f0f 100%)" }}>
+        <footer className="mt-8" style={{ background: "linear-gradient(160deg, #0f0f0f 0%, #1a0d0d 60%, #0f0f0f 100%)" }}>
         {/* Top accent line */}
         <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, #8B2252, #c0406e, #8B2252, transparent)" }} />
 

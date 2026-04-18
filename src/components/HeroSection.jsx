@@ -5,11 +5,16 @@ export default function HeroSection() {
     <section>
       {/* Hero Image Banner */}
       <div className="relative w-full h-[42vh] sm:h-[52vh] md:h-[65vh] lg:h-[75vh] overflow-hidden">
+        {/* Crimson gradient background — crisp on all screens */}
         <div
-          className="hero-image absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/hero-bg.jpeg')" }}
+          className="hero-image absolute inset-0"
+          style={{ background: "linear-gradient(135deg, #8B0000 0%, #C0002A 50%, #8B0000 100%)" }}
         />
-        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+        {/* Diagonal texture overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 11px)" }}
+        />
         <FireEffect />
       </div>
 
