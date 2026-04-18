@@ -158,7 +158,7 @@ async function initDb() {
 app.get("/api/products", async (_req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM products ORDER BY id DESC");
-    res.set("Cache-Control", "public, max-age=60");
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
     res.json(rows.map(parseProduct));
   } catch (err) {
     res.status(500).json({ error: err.message });
