@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import compression from "compression";
 import pg from "pg";
 import cors from "cors";
 import multer from "multer";
@@ -9,16 +10,27 @@ import { Readable } from "stream";
 const { Pool } = pg;
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   process.env.CLIENT_ORIGIN,
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(cors({ origin: allowedOrigins }));
+app.use(compression());
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: "50mb" }));
+
+// ── Request logger ────────────────────────────────────────────────────────
+app.use((req, _res, next) => {
+  console.log(`${new Date().toISOString()}  ${req.method}  ${req.path}`);
+  next();
+});
+
+// ── Health check ──────────────────────────────────────────────────────────
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 // ── PostgreSQL pool ───────────────────────────────────────────────────────
 const pool = new Pool({
@@ -144,6 +156,7 @@ async function initDb() {
 app.get("/api/products", async (_req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM products ORDER BY id DESC");
+    res.set("Cache-Control", "public, max-age=60");
     res.json(rows.map(parseProduct));
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -218,8 +231,8 @@ app.put("/api/settings", async (req, res) => {
 // ── Start ─────────────────────────────────────────────────────────────────
 initDb()
   .then(() => {
-    const server = app.listen(PORT, () => {
-      console.log(`INOUT Fashion API  →  http://localhost:${PORT}`);
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`INOUT Fashion API  →  http://0.0.0.0:${PORT}`);
     });
     server.on("error", (err) => {
       if (err.code === "EADDRINUSE") {
