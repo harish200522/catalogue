@@ -69,31 +69,6 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
-      {/* Tagline Strip — slides in on scroll */}
-      <div
-        className={`w-full relative overflow-hidden transition-all duration-500 ease-out ${
-          scrolled
-            ? "max-h-10 opacity-100 border-b border-white/20"
-            : "max-h-0 opacity-0"
-        }`}
-      >
-        {/* Match hero image background */}
-        <div
-          className="absolute inset-0 bg-cover bg-no-repeat"
-          style={{ backgroundImage: "url('/hero-bg.jpeg')", backgroundPosition: "center 20%" }}
-        />
-        <div className="absolute inset-0 bg-white/15 backdrop-blur-[2px]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 py-1.5 flex items-center justify-center">
-          <p
-            className={`text-[11px] md:text-xs tracking-[0.2em] uppercase text-white/90 font-light transition-opacity duration-500 ease-in-out ${
-              taglineFade ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            {taglines[taglineIndex]}
-          </p>
-        </div>
-      </div>
-
       {/* Main Header Bar */}
       <div
         className={`w-full relative overflow-hidden transition-all duration-300 ease-out ${
@@ -137,6 +112,15 @@ export default function Header({ onMenuToggle, menuOpen, simple = false }) {
               <div className="line3" />
             </label>
           </div>
+
+          {/* Tagline — visible in centre when scrolled */}
+          <p
+            className={`absolute left-1/2 -translate-x-1/2 text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-light transition-all duration-500 ease-in-out pointer-events-none ${
+              scrolled ? "opacity-100 text-white/90" : "opacity-0"
+            } ${taglineFade ? "opacity-100" : "opacity-0"}`}
+          >
+            {taglines[taglineIndex]}
+          </p>
 
           {/* Logo — right side */}
           <a href="#" className="block">
