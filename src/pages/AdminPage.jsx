@@ -954,7 +954,7 @@ function ChangePasswordCard() {
   const [success, setSuccess]   = useState(false);
   const [show, setShow]         = useState({ current: false, newPwd: false, confirm: false });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = {};
     if (!pwForm.current)               errs.current = "Enter your current password";
@@ -963,7 +963,7 @@ function ChangePasswordCard() {
     if (pwForm.newPwd !== pwForm.confirm) errs.confirm = "Passwords do not match";
     if (Object.keys(errs).length) { setPwErrors(errs); return; }
 
-    const result = changePassword(pwForm.current, pwForm.newPwd, pwForm.confirm);
+    const result = await changePassword(pwForm.current, pwForm.newPwd, pwForm.confirm);
     if (result.success) {
       setSuccess(true);
       setPwForm({ current: "", newPwd: "", confirm: "" });
