@@ -1,13 +1,8 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AUTH_USERNAME   = "inout@fashion";
-const PASSWORD_KEY    = "inout_admin_password";
 const SESSION_KEY     = "inout_admin_logged_in";
 const DEFAULT_PASSWORD = "INOUTKARUR";
-
-function getStoredPassword() {
-  return localStorage.getItem(PASSWORD_KEY) || DEFAULT_PASSWORD;
-}
 
 export const AuthContext = createContext(null);
 
@@ -15,9 +10,21 @@ export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => sessionStorage.getItem(SESSION_KEY) === "true"
   );
+  const [adminPassword, setAdminPassword] = useState(DEFAULT_PASSWORD);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.adminPassword) {
+          setAdminPassword(data.adminPassword);
+        }
+      })
+      .catch(err => console.error("Failed to fetch password:", err));
+  }, []);
 
   const login = (username, password) => {
-    if (username === AUTH_USERNAME && password === getStoredPassword()) {
+    if (username === AUTH_USERNAME && password === adminPassword) {
       sessionStorage.setItem(SESSION_KEY, "true");
       setIsLoggedIn(true);
       return { success: true };
@@ -30,18 +37,30 @@ export function AuthProvider({ children }) {
     setIsLoggedIn(false);
   };
 
-  const changePassword = (currentPwd, newPwd, confirmPwd) => {
-    if (currentPwd !== getStoredPassword())
+  const changePassword = async (currentPwd, newPwd, confirmPwd) => {
+    if (currentPwd !== adminPassword)
       return { success: false, error: "Current password is incorrect" };
     if (newPwd.length < 6)
       return { success: false, error: "Password must be at least 6 characters" };
     if (newPwd !== confirmPwd)
       return { success: false, error: "New passwords do not match" };
-    localStorage.setItem(PASSWORD_KEY, newPwd);
-    return { success: true };
+    
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminPassword: newPwd })
+      });
+      if (!res.ok) throw new Error("Failed to update password");
+      setAdminPassword(newPwd);
+      return { success: true };
+    } catch (err) {
+      console.error("Password change error:", err);
+      return { success: false, error: "Failed to update password" };
+    }
   };
 
-  const verifyPassword = (pwd) => pwd === getStoredPassword();
+  const verifyPassword = (pwd) => pwd === adminPassword;
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout, changePassword, verifyPassword }}>

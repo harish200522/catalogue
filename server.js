@@ -151,6 +151,7 @@ async function initDb() {
       "instagramLink",
       "https://www.instagram.com/inout_fashions_showroom?igsh=MTMyaDlxcGt3MjA4cQ==",
     ]);
+    await pool.query("INSERT INTO settings (key,value) VALUES ($1,$2)", ["adminPassword", "INOUTKARUR"]);
   }
 }
 
