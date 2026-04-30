@@ -7,13 +7,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail \"node server.js\" \"vite\"",
-    "start": "node server.js",
-    "server": "node server.js",
-    "client": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "node server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
