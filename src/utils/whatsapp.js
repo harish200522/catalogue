@@ -34,7 +34,7 @@ export function generateWhatsAppLink(product, waNumber = DEFAULT_WA_NUMBER) {
     ``,
     `Product: ${product.name}`,
     `Price: ₹${product.price}`,
-    `${product.quantity}`,
+    `Min.qty: ${product.quantity}`,
   ];
 
   if (imageUrl) {

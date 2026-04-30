@@ -224,7 +224,10 @@ const products = {
 };
 
 export const categories = [
-  { key: "tshirts", label: "T-Shirts" },
+  { key: "collar_tshirt", label: "Collar T-shirt" },
+  { key: "roundneck_tshirt", label: "Round Neck T-shirt" },
+  { key: "fullsleeve_tshirt", label: "Full Sleeve T-shirt" },
+  { key: "sleeveless_tshirt", label: "Sleeveless T-shirt" },
   { key: "shirts", label: "Shirts" },
   { key: "pants", label: "Pants" },
   { key: "shorts", label: "Shorts" },

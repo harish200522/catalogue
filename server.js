@@ -103,11 +103,11 @@ async function initDb() {
     const ins = "INSERT INTO products (name,category,price,quantity,images) VALUES ($1,$2,$3,$4,$5)";
     const seeds = [
       // T-Shirts
-      ["Essential Crew Neck",    "tshirts", 320, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=750&fit=crop&q=80"]'],
-      ["Oversized Relaxed Fit",  "tshirts", 380, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=750&fit=crop&q=80"]'],
-      ["Heavyweight Cotton Tee", "tshirts", 420, "MOQ: 30 pcs", '["https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=750&fit=crop&q=80"]'],
-      ["Acid Wash Vintage",      "tshirts", 460, "MOQ: 40 pcs", '["https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&h=750&fit=crop&q=80"]'],
-      ["Minimal Logo Tee",       "tshirts", 350, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=600&h=750&fit=crop&q=80"]'],
+      ["Essential Crew Neck",    "roundneck_tshirt", 320, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=750&fit=crop&q=80"]'],
+      ["Oversized Relaxed Fit",  "roundneck_tshirt", 380, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=750&fit=crop&q=80"]'],
+      ["Heavyweight Cotton Tee", "fullsleeve_tshirt", 420, "MOQ: 30 pcs", '["https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=750&fit=crop&q=80"]'],
+      ["Acid Wash Vintage",      "collar_tshirt", 460, "MOQ: 40 pcs", '["https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&h=750&fit=crop&q=80"]'],
+      ["Minimal Logo Tee",       "sleeveless_tshirt", 350, "MOQ: 50 pcs", '["https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=600&h=750&fit=crop&q=80"]'],
       // Shirts
       ["Oxford Button Down",   "shirts", 580, "MOQ: 30 pcs", '["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=750&fit=crop&q=80"]'],
       ["Linen Camp Collar",    "shirts", 640, "MOQ: 25 pcs", '["https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&h=750&fit=crop&q=80"]'],
@@ -226,6 +226,23 @@ app.put("/api/settings", async (req, res) => {
     const obj = {};
     rows.forEach((r) => { obj[r.key] = r.value; });
     res.json(obj);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Migration API ──────────────────────────────────────────────────────────
+app.post("/api/migrate-categories", async (_req, res) => {
+  try {
+    // Update existing tshirts products to roundneck_tshirt (default)
+    const result = await pool.query(
+      "UPDATE products SET category = 'roundneck_tshirt' WHERE category = 'tshirts' RETURNING *"
+    );
+    res.json({ 
+      success: true, 
+      message: `Migrated ${result.rowCount} products from 'tshirts' to 'roundneck_tshirt'`,
+      updated: result.rowCount 
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
