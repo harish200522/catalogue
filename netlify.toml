@@ -8,10 +8,10 @@
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"
 
-# Proxy /api/* to Hostinger backend — avoids CORS entirely
+# Proxy /api/* to Hostinger backend (via direct IP) — avoids CORS entirely
 [[redirects]]
   from = "/api/*"
-  to = "https://inoutcatalogue.inoutfashion.in/api/:splat"
+  to = "https://145.79.213.33/api/:splat"
   status = 200
   force = true
 
