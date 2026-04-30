@@ -43,7 +43,10 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ── Health check ──────────────────────────────────────────────────────────
-app.get("/health", (_req, res) => res.json({ status: "ok" }));
+app.get("/health", (_req, res) => {
+  res.set("X-Served-By", "Hostinger-Backend-INOUT");
+  res.json({ status: "ok" });
+});
 
 // ── PostgreSQL pool ───────────────────────────────────────────────────────
 const pool = new Pool({
@@ -171,6 +174,7 @@ app.get("/api/products", async (_req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM products ORDER BY id DESC");
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("X-Served-By", "Hostinger-Backend-INOUT");
     res.json(rows.map(parseProduct));
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -184,6 +188,7 @@ app.post("/api/products", async (req, res) => {
       "INSERT INTO products (name,category,price,quantity,images) VALUES ($1,$2,$3,$4,$5) RETURNING *",
       [name, category, price, quantity, JSON.stringify(images)]
     );
+    res.set("X-Served-By", "Hostinger-Backend-INOUT");
     res.status(201).json(parseProduct(rows[0]));
   } catch (err) {
     res.status(500).json({ error: err.message });
