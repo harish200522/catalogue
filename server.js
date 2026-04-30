@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import helmet from "helmet";
 import compression from "compression";
+import rateLimit from "express-rate-limit";
 import pg from "pg";
 import cors from "cors";
 import multer from "multer";
@@ -13,23 +14,30 @@ const { Pool } = pg;
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  process.env.CLIENT_ORIGIN,
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+const allowedOrigins = process.env.FRONTEND_URL
+  ? [process.env.FRONTEND_URL]
+  : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: "50mb" }));
 
-// ── Request logger ────────────────────────────────────────────────────────
-app.use((req, _res, next) => {
-  console.log(`${new Date().toISOString()}  ${req.method}  ${req.path}`);
-  next();
+// ── Rate limiting ───────────────────────────────────────────────────────────
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: "Too many requests, please try again later" },
 });
+app.use("/api/", limiter);
+
+// ── Request logger (development only) ────────────────────────────────────
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, _res, next) => {
+    console.log(`${new Date().toISOString()}  ${req.method}  ${req.path}`);
+    next();
+  });
+}
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
@@ -248,9 +256,16 @@ app.post("/api/migrate-categories", async (_req, res) => {
   }
 });
 
+// ── Global error handler ──────────────────────────────────────────────────────
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: process.env.NODE_ENV === "production" ? "Internal server error" : err.message });
+});
+
 // ── Start: listen first, then init DB ────────────────────────────────────
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`INOUT Fashion API  →  http://0.0.0.0:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
   initDb()
     .then(() => console.log("DB ready."))
     .catch((err) => console.error("DB init failed:", err));
