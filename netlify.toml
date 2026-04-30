@@ -8,12 +8,13 @@
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"
 
-# Proxy /api/* to Hostinger backend (via direct IP) — avoids CORS entirely
+# Proxy /api/* to Hostinger backend — avoids CORS entirely
 [[redirects]]
   from = "/api/*"
-  to = "https://145.79.213.33/api/:splat"
+  to = "https://inoutcatalogue.inoutfashion.in/api/:splat"
   status = 200
   force = true
+  headers = {Host = "inoutcatalogue.inoutfashion.in"}
 
 # SPA fallback — must be last
 [[redirects]]
