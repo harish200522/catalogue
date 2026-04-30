@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { API_BASE } from "../config/api";
 
 const AUTH_USERNAME   = "inout@fashion";
 const SESSION_KEY     = "inout_admin_logged_in";
@@ -13,7 +14,7 @@ export function AuthProvider({ children }) {
   const [adminPassword, setAdminPassword] = useState(DEFAULT_PASSWORD);
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch(`${API_BASE}/settings`)
       .then(res => res.json())
       .then(data => {
         if (data.adminPassword) {
@@ -46,7 +47,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: "New passwords do not match" };
     
     try {
-      const res = await fetch("/api/settings", {
+      const res = await fetch(`${API_BASE}/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminPassword: newPwd })

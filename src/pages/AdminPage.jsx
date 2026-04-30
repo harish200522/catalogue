@@ -6,6 +6,7 @@ import { useProducts } from "../context/ProductContext";
 import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import PageTransition from "../components/PageTransition";
+import { API_BASE } from "../config/api";
 
 const CATEGORY_OPTIONS = categories.map((c) => ({ key: c.key, label: c.label }));
 
@@ -58,7 +59,7 @@ export default function AdminPage() {
         files.map(async (file) => {
           const formData = new FormData();
           formData.append("image", file);
-          const res = await fetch("/api/upload-image", { method: "POST", body: formData });
+          const res = await fetch(`${API_BASE}/upload-image`, { method: "POST", body: formData });
           if (!res.ok) throw new Error(await res.text());
           const { imageUrl } = await res.json();
           return imageUrl;
