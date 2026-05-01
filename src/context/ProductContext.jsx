@@ -15,7 +15,17 @@ export function ProductProvider({ children }) {
   useEffect(() => {
     fetch(`${API_BASE}/products`)
       .then((r) => r.json())
-      .then((data) => { setProducts(data); setLoading(false); })
+      .then((data) => {
+        // Ensure all products have required fields
+        const validated = Array.isArray(data) ? data.map(p => ({
+          ...p,
+          name: p.name || "Unnamed",
+          category: p.category || "other",
+          price: p.price || 0
+        })) : [];
+        setProducts(validated);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -23,7 +33,8 @@ export function ProductProvider({ children }) {
   const addProduct = (productData) => {
     // Show immediately with a temporary id
     const tempId = `tmp_${Date.now()}`;
-    setProducts((prev) => [{ ...productData, id: tempId }, ...prev]);
+    const tempProduct = { ...productData, id: tempId, name: productData.name || "Unnamed" };
+    setProducts((prev) => [tempProduct, ...prev]);
 
     const token = getAuthToken();
     if (!token) {
@@ -40,10 +51,13 @@ export function ProductProvider({ children }) {
       },
       body: JSON.stringify(productData),
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
       .then((saved) => {
         // Replace temp entry with server-assigned id
-        setProducts((prev) => prev.map((p) => (p.id === tempId ? saved : p)));
+        setProducts((prev) => prev.map((p) => (p.id === tempId ? { ...saved, name: saved.name || "Unnamed" } : p)));
       })
       .catch((err) => {
         console.error("Add product error:", err);
@@ -69,11 +83,18 @@ export function ProductProvider({ children }) {
       },
       body: JSON.stringify(data),
     })
-      .then((r) => r.json())
-      .then((saved) => {
-        setProducts((prev) => prev.map((p) => (p.id === id ? saved : p)));
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
       })
-      .catch((err) => console.error("Update product error:", err));
+      .then((saved) => {
+        setProducts((prev) => prev.map((p) => (p.id === id ? { ...saved, name: saved.name || "Unnamed" } : p)));
+      })
+      .catch((err) => {
+        console.error("Update product error:", err);
+        // Reload to sync state
+        window.location.reload();
+      });
   };
 
   const deleteProduct = (id) => {
@@ -91,7 +112,14 @@ export function ProductProvider({ children }) {
         "Authorization": `Bearer ${token}`
       }
     })
-      .catch((err) => console.error("Delete product error:", err));
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+      })
+      .catch((err) => {
+        console.error("Delete product error:", err);
+        // Reload to sync state
+        window.location.reload();
+      });
   };
 
   // ── Derive per-category list ─────────────────────────────────────────

@@ -79,6 +79,7 @@ export default function AdminPage() {
 
   // ── Derived list ────────────────────────────────────────────────────────
   const visible = items.filter((p) => {
+    if (!p || !p.name) return false; // Skip products with missing name
     const matchCat = filterCat === "all" || p.category === filterCat;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
