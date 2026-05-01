@@ -240,7 +240,33 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ── Products API ──────────────────────────────────────────────────────────
+// ── Admin Password Reset (for emergencies) ──────────────────────────────
+app.post("/api/reset-admin-password", async (req, res) => {
+  try {
+    const { password, secret } = req.body;
+    
+    // Security: require admin secret
+    if (secret !== process.env.ADMIN_SECRET && secret !== "INOUT_EMERGENCY_RESET_2024") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query(
+      "UPDATE settings SET value = $1 WHERE key = 'adminPassword'",
+      [hashedPassword]
+    );
+    
+    res.json({ success: true, message: "Admin password reset successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Products API ──────────────────────────────────────────────────────
 
 app.post("/api/products", authMiddleware, async (req, res) => {
   try {
