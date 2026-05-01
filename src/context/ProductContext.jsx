@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE } from "../config/api";
+import { useAuth } from "./AuthContext";
 
 // ── Context ───────────────────────────────────────────────────────────────
 export const ProductContext = createContext(null);
@@ -7,6 +8,7 @@ export const ProductContext = createContext(null);
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading]   = useState(true);
+  const { token } = useAuth();
 
   // ── Load all products from server on mount ───────────────────────────
   useEffect(() => {
@@ -24,14 +26,18 @@ export function ProductProvider({ children }) {
 
     fetch(`${API_BASE}/products`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(productData),
     })
       .then((r) => r.json())
       .then((saved) => {
         // Replace temp entry with server-assigned id
         setProducts((prev) => prev.map((p) => (p.id === tempId ? saved : p)));
-      });
+      })
+      .catch((err) => console.error("Add product error:", err));
   };
 
   const updateProduct = (id, data) => {
@@ -40,18 +46,28 @@ export function ProductProvider({ children }) {
 
     fetch(`${API_BASE}/products/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(data),
     })
       .then((r) => r.json())
       .then((saved) => {
         setProducts((prev) => prev.map((p) => (p.id === id ? saved : p)));
-      });
+      })
+      .catch((err) => console.error("Update product error:", err));
   };
 
   const deleteProduct = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
+    fetch(`${API_BASE}/products/${id}`, { 
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .catch((err) => console.error("Delete product error:", err));
   };
 
   // ── Derive per-category list ─────────────────────────────────────────

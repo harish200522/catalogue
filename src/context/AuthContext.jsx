@@ -1,46 +1,50 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import { API_BASE } from "../config/api";
 
-const AUTH_USERNAME   = "inout@fashion";
-const SESSION_KEY     = "inout_admin_logged_in";
-const DEFAULT_PASSWORD = "INOUTKARUR";
+const AUTH_USERNAME = "inout@fashion";
+const SESSION_KEY = "inout_admin_token";
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(
-    () => sessionStorage.getItem(SESSION_KEY) === "true"
+    () => !!sessionStorage.getItem(SESSION_KEY)
   );
-  const [adminPassword, setAdminPassword] = useState(DEFAULT_PASSWORD);
+  const [token, setToken] = useState(
+    () => sessionStorage.getItem(SESSION_KEY) || null
+  );
 
-  useEffect(() => {
-    fetch(`${API_BASE}/settings`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.adminPassword) {
-          setAdminPassword(data.adminPassword);
-        }
-      })
-      .catch(err => console.error("Failed to fetch password:", err));
-  }, []);
+  const login = async (username, password) => {
+    try {
+      const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
 
-  const login = (username, password) => {
-    if (username === AUTH_USERNAME && password === adminPassword) {
-      sessionStorage.setItem(SESSION_KEY, "true");
+      if (!res.ok) {
+        const data = await res.json();
+        return { success: false, error: data.error || "Login failed" };
+      }
+
+      const data = await res.json();
+      sessionStorage.setItem(SESSION_KEY, data.token);
+      setToken(data.token);
       setIsLoggedIn(true);
       return { success: true };
+    } catch (err) {
+      console.error("Login error:", err);
+      return { success: false, error: "Network error" };
     }
-    return { success: false, error: "Invalid username or password" };
   };
 
   const logout = () => {
     sessionStorage.removeItem(SESSION_KEY);
+    setToken(null);
     setIsLoggedIn(false);
   };
 
   const changePassword = async (currentPwd, newPwd, confirmPwd) => {
-    if (currentPwd !== adminPassword)
-      return { success: false, error: "Current password is incorrect" };
     if (newPwd.length < 6)
       return { success: false, error: "Password must be at least 6 characters" };
     if (newPwd !== confirmPwd)
@@ -49,11 +53,13 @@ export function AuthProvider({ children }) {
     try {
       const res = await fetch(`${API_BASE}/settings`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ adminPassword: newPwd })
       });
       if (!res.ok) throw new Error("Failed to update password");
-      setAdminPassword(newPwd);
       return { success: true };
     } catch (err) {
       console.error("Password change error:", err);
@@ -61,10 +67,8 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const verifyPassword = (pwd) => pwd === adminPassword;
-
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, changePassword, verifyPassword }}>
+    <AuthContext.Provider value={{ isLoggedIn, token, login, logout, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

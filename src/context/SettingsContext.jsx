@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE } from "../config/api";
+import { useAuth } from "./AuthContext";
 
 const DEFAULTS = {
   whatsappNumber: "919791639162",
@@ -12,6 +13,7 @@ export const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(DEFAULTS);
+  const { token } = useAuth();
 
   // ── Load from server on mount ────────────────────────────────────────
   useEffect(() => {
@@ -26,9 +28,13 @@ export function SettingsProvider({ children }) {
     setSettings((prev) => ({ ...prev, ...partial }));
     fetch(`${API_BASE}/settings`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(partial),
-    });
+    })
+      .catch((err) => console.error("Update settings error:", err));
   };
 
   return (

@@ -8,11 +8,14 @@ import cors from "cors";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { Readable } from "stream";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const { Pool } = pg;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || "inout-fashion-secret-key-change-in-production";
 
 // Trust proxy for rate limiting behind reverse proxy (Hostinger)
 app.set("trust proxy", 1);
@@ -48,10 +51,40 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// ── JWT Middleware ────────────────────────────────────────────────────────
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Missing authorization token" });
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
+};
+
+// ── Input Validation Helpers ──────────────────────────────────────────────
+const validateProduct = (data) => {
+  const errors = [];
+  if (!data.name || typeof data.name !== "string" || data.name.trim().length === 0)
+    errors.push("Product name is required and must be a non-empty string");
+  if (!data.category || typeof data.category !== "string" || data.category.trim().length === 0)
+    errors.push("Category is required and must be a non-empty string");
+  if (typeof data.price !== "number" || data.price < 0)
+    errors.push("Price must be a non-negative number");
+  if (!data.quantity || typeof data.quantity !== "string" || data.quantity.trim().length === 0)
+    errors.push("Quantity is required and must be a non-empty string");
+  if (!Array.isArray(data.images))
+    errors.push("Images must be an array");
+  return errors;
+};
+
 // ── PostgreSQL pool ───────────────────────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: true }, // Fixed: Enable strict SSL verification
 });
 
 // ── Cloudinary config ─────────────────────────────────────────────────────
@@ -165,7 +198,9 @@ async function initDb() {
       "instagramLink",
       "https://www.instagram.com/inout_fashions_showroom?igsh=MTMyaDlxcGt3MjA4cQ==",
     ]);
-    await pool.query("INSERT INTO settings (key,value) VALUES ($1,$2)", ["adminPassword", "INOUTKARUR"]);
+    // Hash the default admin password with bcrypt
+    const hashedPassword = await bcrypt.hash("INOUTKARUR", 10);
+    await pool.query("INSERT INTO settings (key,value) VALUES ($1,$2)", ["adminPassword", hashedPassword]);
   }
 }
 
@@ -181,9 +216,40 @@ app.get("/api/products", async (_req, res) => {
   }
 });
 
-app.post("/api/products", async (req, res) => {
+// ── Authentication API ────────────────────────────────────────────────────
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password)
+      return res.status(400).json({ error: "Username and password required" });
+
+    const { rows } = await pool.query("SELECT value FROM settings WHERE key = 'adminPassword'");
+    if (rows.length === 0)
+      return res.status(500).json({ error: "Admin password not configured" });
+
+    const hashedPassword = rows[0].value;
+    const isValid = await bcrypt.compare(password, hashedPassword);
+    
+    if (username !== "inout@fashion" || !isValid)
+      return res.status(401).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "24h" });
+    res.json({ token, success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Products API ──────────────────────────────────────────────────────────
+
+app.post("/api/products", authMiddleware, async (req, res) => {
   try {
     const { name, category, price, quantity, images = [] } = req.body;
+    
+    // Validate input
+    const errors = validateProduct({ name, category, price, quantity, images });
+    if (errors.length > 0) return res.status(400).json({ errors });
+
     const { rows } = await pool.query(
       "INSERT INTO products (name,category,price,quantity,images) VALUES ($1,$2,$3,$4,$5) RETURNING *",
       [name, category, price, quantity, JSON.stringify(images)]
@@ -195,12 +261,20 @@ app.post("/api/products", async (req, res) => {
   }
 });
 
-app.put("/api/products/:id", async (req, res) => {
+app.put("/api/products/:id", authMiddleware, async (req, res) => {
   try {
     const { name, category, price, quantity, images = [] } = req.body;
+    
+    // Validate input
+    const errors = validateProduct({ name, category, price, quantity, images });
+    if (errors.length > 0) return res.status(400).json({ errors });
+
+    const productId = parseInt(req.params.id);
+    if (isNaN(productId)) return res.status(400).json({ error: "Invalid product ID" });
+
     const { rows } = await pool.query(
       "UPDATE products SET name=$1,category=$2,price=$3,quantity=$4,images=$5 WHERE id=$6 RETURNING *",
-      [name, category, price, quantity, JSON.stringify(images), req.params.id]
+      [name, category, price, quantity, JSON.stringify(images), productId]
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(parseProduct(rows[0]));
@@ -209,9 +283,12 @@ app.put("/api/products/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/products/:id", async (req, res) => {
+app.delete("/api/products/:id", authMiddleware, async (req, res) => {
   try {
-    await pool.query("DELETE FROM products WHERE id=$1", [req.params.id]);
+    const productId = parseInt(req.params.id);
+    if (isNaN(productId)) return res.status(400).json({ error: "Invalid product ID" });
+
+    await pool.query("DELETE FROM products WHERE id=$1", [productId]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -230,15 +307,18 @@ app.get("/api/settings", async (_req, res) => {
   }
 });
 
-app.put("/api/settings", async (req, res) => {
+app.put("/api/settings", authMiddleware, async (req, res) => {
   try {
     for (const [k, v] of Object.entries(req.body)) {
+      if (typeof k !== "string" || typeof v !== "string")
+        return res.status(400).json({ error: "Settings keys and values must be strings" });
+      
       await pool.query(
         "INSERT INTO settings (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value",
         [k, v]
       );
     }
-    const { rows } = await pool.query("SELECT * FROM settings");
+    const { rows } = await pool.query("SELECT * FROM settings WHERE key != 'adminPassword'");
     const obj = {};
     rows.forEach((r) => { obj[r.key] = r.value; });
     res.json(obj);
