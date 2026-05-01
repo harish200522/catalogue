@@ -23,11 +23,17 @@ export function AuthProvider({ children }) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        return { success: false, error: data.error || "Login failed" };
+        let errorMsg = "Login failed";
+        try {
+          const data = await res.json();
+          errorMsg = data.error || errorMsg;
+        } catch {}
+        return { success: false, error: errorMsg };
       }
 
       const data = await res.json();
+      if (!data.token) throw new Error("No token in response");
+      
       sessionStorage.setItem(SESSION_KEY, data.token);
       setToken(data.token);
       setIsLoggedIn(true);
@@ -59,11 +65,14 @@ export function AuthProvider({ children }) {
         },
         body: JSON.stringify({ adminPassword: newPwd })
       });
-      if (!res.ok) throw new Error("Failed to update password");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to update password");
+      }
       return { success: true };
     } catch (err) {
       console.error("Password change error:", err);
-      return { success: false, error: "Failed to update password" };
+      return { success: false, error: err.message || "Failed to update password" };
     }
   };
 

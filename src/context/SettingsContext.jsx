@@ -16,8 +16,14 @@ export function SettingsProvider({ children }) {
   // ── Load from server on mount ────────────────────────────────────────
   useEffect(() => {
     fetch(`${API_BASE}/settings`)
-      .then((r) => r.json())
-      .then((data) => setSettings({ ...DEFAULTS, ...data }))
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        const validated = data && typeof data === 'object' ? data : {};
+        setSettings({ ...DEFAULTS, ...validated });
+      })
       .catch(() => {}); // keep defaults if server unreachable
   }, []);
 
@@ -39,7 +45,14 @@ export function SettingsProvider({ children }) {
       },
       body: JSON.stringify(partial),
     })
-      .catch((err) => console.error("Update settings error:", err));
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
+      .catch((err) => {
+        console.error("Update settings error:", err);
+        // Revert to previous state on error
+      });
   };
 
   return (
