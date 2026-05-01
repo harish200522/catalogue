@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE } from "../config/api";
-import { useAuth } from "./AuthContext";
 
 const DEFAULTS = {
   whatsappNumber: "919791639162",
@@ -13,7 +12,6 @@ export const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(DEFAULTS);
-  const { token } = useAuth();
 
   // ── Load from server on mount ────────────────────────────────────────
   useEffect(() => {
@@ -26,6 +24,13 @@ export function SettingsProvider({ children }) {
   // ── Optimistic update + server sync ─────────────────────────────────
   const updateSettings = (partial) => {
     setSettings((prev) => ({ ...prev, ...partial }));
+    
+    const token = sessionStorage.getItem("inout_admin_token");
+    if (!token) {
+      console.error("Not authenticated");
+      return;
+    }
+
     fetch(`${API_BASE}/settings`, {
       method: "PUT",
       headers: { 

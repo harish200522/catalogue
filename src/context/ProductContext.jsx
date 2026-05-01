@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE } from "../config/api";
-import { useAuth } from "./AuthContext";
 
 // ── Context ───────────────────────────────────────────────────────────────
 export const ProductContext = createContext(null);
@@ -8,7 +7,9 @@ export const ProductContext = createContext(null);
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading]   = useState(true);
-  const { token } = useAuth();
+
+  // ── Get token from sessionStorage (set by AuthContext)
+  const getAuthToken = () => sessionStorage.getItem("inout_admin_token");
 
   // ── Load all products from server on mount ───────────────────────────
   useEffect(() => {
@@ -24,6 +25,13 @@ export function ProductProvider({ children }) {
     const tempId = `tmp_${Date.now()}`;
     setProducts((prev) => [{ ...productData, id: tempId }, ...prev]);
 
+    const token = getAuthToken();
+    if (!token) {
+      console.error("Not authenticated");
+      setProducts((prev) => prev.filter((p) => p.id !== tempId));
+      return;
+    }
+
     fetch(`${API_BASE}/products`, {
       method: "POST",
       headers: { 
@@ -37,12 +45,21 @@ export function ProductProvider({ children }) {
         // Replace temp entry with server-assigned id
         setProducts((prev) => prev.map((p) => (p.id === tempId ? saved : p)));
       })
-      .catch((err) => console.error("Add product error:", err));
+      .catch((err) => {
+        console.error("Add product error:", err);
+        setProducts((prev) => prev.filter((p) => p.id !== tempId));
+      });
   };
 
   const updateProduct = (id, data) => {
     // Optimistic update
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+
+    const token = getAuthToken();
+    if (!token) {
+      console.error("Not authenticated");
+      return;
+    }
 
     fetch(`${API_BASE}/products/${id}`, {
       method: "PUT",
@@ -61,6 +78,13 @@ export function ProductProvider({ children }) {
 
   const deleteProduct = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    
+    const token = getAuthToken();
+    if (!token) {
+      console.error("Not authenticated");
+      return;
+    }
+
     fetch(`${API_BASE}/products/${id}`, { 
       method: "DELETE",
       headers: {
