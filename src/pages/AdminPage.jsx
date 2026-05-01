@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../data/products";
@@ -39,11 +39,15 @@ export default function AdminPage() {
 
   const fileInputRef = useRef(null);
 
-  // Auth guard
-  if (!isLoggedIn) {
-    navigate("/login", { replace: true });
-    return null;
-  }
+  // Auth guard — redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login", { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
+
+  // If not logged in, don't render anything (will redirect)
+  if (!isLoggedIn) return null;
 
   // ── Image upload ────────────────────────────────────────────────────────
   const handleImageUpload = async (e) => {
