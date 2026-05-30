@@ -128,9 +128,11 @@ export default function AdminPage() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     if (editingId !== null) {
-      updateProduct(editingId, { ...form, price: Number(form.price) });
+      const { soldOut, ...rest } = form;
+      updateProduct(editingId, { ...rest, price: Number(form.price), sold_out: soldOut });
     } else {
-      addProduct({ ...form, price: Number(form.price) });
+      const { soldOut, ...rest } = form;
+      addProduct({ ...rest, price: Number(form.price), sold_out: soldOut });
     }
     setView("list");
   };

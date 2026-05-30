@@ -124,6 +124,7 @@ function parseProduct(row) {
   return {
     ...row,
     images: typeof row.images === "string" ? JSON.parse(row.images) : row.images,
+    soldOut: row.sold_out || false, // Convert snake_case to camelCase for frontend
   };
 }
 
@@ -278,15 +279,15 @@ app.post("/api/reset-admin-password", async (req, res) => {
 
 app.post("/api/products", authMiddleware, async (req, res) => {
   try {
-    const { name, category, price, quantity, images = [] } = req.body;
+    const { name, category, price, quantity, images = [], sold_out = false } = req.body;
     
     // Validate input
     const errors = validateProduct({ name, category, price, quantity, images });
     if (errors.length > 0) return res.status(400).json({ errors });
 
     const { rows } = await pool.query(
-      "INSERT INTO products (name,category,price,quantity,images) VALUES ($1,$2,$3,$4,$5) RETURNING *",
-      [name, category, price, quantity, JSON.stringify(images)]
+      "INSERT INTO products (name,category,price,quantity,images,sold_out) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+      [name, category, price, quantity, JSON.stringify(images), sold_out]
     );
     res.set("X-Served-By", "Hostinger-Backend-INOUT");
     res.status(201).json(parseProduct(rows[0]));
@@ -297,7 +298,7 @@ app.post("/api/products", authMiddleware, async (req, res) => {
 
 app.put("/api/products/:id", authMiddleware, async (req, res) => {
   try {
-    const { name, category, price, quantity, images = [] } = req.body;
+    const { name, category, price, quantity, images = [], sold_out = false } = req.body;
     
     // Validate input
     const errors = validateProduct({ name, category, price, quantity, images });
@@ -307,8 +308,8 @@ app.put("/api/products/:id", authMiddleware, async (req, res) => {
     if (isNaN(productId)) return res.status(400).json({ error: "Invalid product ID" });
 
     const { rows } = await pool.query(
-      "UPDATE products SET name=$1,category=$2,price=$3,quantity=$4,images=$5 WHERE id=$6 RETURNING *",
-      [name, category, price, quantity, JSON.stringify(images), productId]
+      "UPDATE products SET name=$1,category=$2,price=$3,quantity=$4,images=$5,sold_out=$6 WHERE id=$7 RETURNING *",
+      [name, category, price, quantity, JSON.stringify(images), sold_out, productId]
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(parseProduct(rows[0]));
