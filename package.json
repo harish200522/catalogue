@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "test -d dist && echo 'Frontend already built on Netlify' || echo 'Build complete'"
+    "build": "echo Build ready"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
