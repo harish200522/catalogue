@@ -16,8 +16,9 @@
   force = true
   headers = {Host = "inoutcatalogue.inoutfashion.in"}
 
-# SPA fallback — must be last
+# SPA fallback — must be last (exclude static assets)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Status = [404]}
