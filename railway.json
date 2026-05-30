@@ -4,7 +4,7 @@
   "note": "Backend migrated to Hostinger Node.js plan (https://inoutcatalogue.inoutfashion.in)",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install"
+    "buildCommand": "npm install --production=false"
   },
   "deploy": {
     "startCommand": "node server.js",
