@@ -8,22 +8,22 @@
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"
 
+# Cache static assets (they have hash in filename)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Proxy /api/* to Hostinger backend — avoids CORS entirely
 [[redirects]]
   from = "/api/*"
   to = "https://inoutcatalogue.inoutfashion.in/api/:splat"
   status = 200
   force = true
-  headers = {Host = "inoutcatalogue.inoutfashion.in"}
 
-# Don't redirect files with extensions (static assets)
-[[redirects]]
-  from = "/*.*"
-  to = ":splat"
-  status = 200
-
-# SPA fallback for all other routes — must be last
+# SPA fallback for client-side routes — only routes without extension
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Status = [404]}
