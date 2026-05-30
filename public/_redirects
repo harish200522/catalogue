@@ -1,0 +1,5 @@
+# Proxy API requests to Hostinger backend
+/api/* https://inoutcatalogue.inoutfashion.in/api/:splat 200
+
+# SPA redirect - ONLY for routes without file extensions
+/*    /index.html   200

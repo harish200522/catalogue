@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "echo Build ready"
+    "build": "vite build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
