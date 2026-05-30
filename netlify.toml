@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm install --include=dev && npm run build"
   publish = "dist"
 
 # Prevent Netlify CDN from caching API responses
