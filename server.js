@@ -136,13 +136,21 @@ async function initDb() {
       category TEXT NOT NULL,
       price    REAL NOT NULL,
       quantity TEXT NOT NULL,
-      images   TEXT NOT NULL DEFAULT '[]'
+      images   TEXT NOT NULL DEFAULT '[]',
+      sold_out BOOLEAN DEFAULT FALSE
     );
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
   `);
+
+  // ── Add sold_out column if it doesn't exist ──
+  try {
+    await pool.query(`ALTER TABLE products ADD COLUMN sold_out BOOLEAN DEFAULT FALSE`);
+  } catch (err) {
+    // Column already exists — ignore error
+  }
 
   // Seed products
   const { rows: [{ n }] } = await pool.query("SELECT COUNT(*) as n FROM products");
@@ -316,6 +324,27 @@ app.delete("/api/products/:id", authMiddleware, async (req, res) => {
 
     await pool.query("DELETE FROM products WHERE id=$1", [productId]);
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Toggle Product Sold Out Status ────────────────────────────────────────
+app.patch("/api/products/:id/sold-out", authMiddleware, async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    if (isNaN(productId)) return res.status(400).json({ error: "Invalid product ID" });
+
+    const { sold_out } = req.body;
+    if (typeof sold_out !== "boolean")
+      return res.status(400).json({ error: "sold_out must be a boolean" });
+
+    const { rows } = await pool.query(
+      "UPDATE products SET sold_out=$1 WHERE id=$2 RETURNING *",
+      [sold_out, productId]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Product not found" });
+    res.json(parseProduct(rows[0]));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

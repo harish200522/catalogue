@@ -16,7 +16,13 @@
   force = true
   headers = {Host = "inoutcatalogue.inoutfashion.in"}
 
-# SPA fallback — must be last (exclude static assets)
+# Don't redirect files with extensions (static assets)
+[[redirects]]
+  from = "/*.*"
+  to = ":splat"
+  status = 200
+
+# SPA fallback for all other routes — must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
