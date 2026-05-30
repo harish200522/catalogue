@@ -274,7 +274,7 @@ export default function ProductCard({ product }) {
           />
         </div>
         {/* Mobile-always-visible WhatsApp button */}
-        {!product.soldOut && (a
+        {!product.soldOut && (<a
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
