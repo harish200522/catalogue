@@ -239,6 +239,18 @@ export default function ProductCard({ product }) {
           className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ background: "#8B2252" }}
         />
+        {/* Sold Out Overlay */}
+        {product.soldOut && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl">
+            <div className="text-center">
+              <svg className="w-10 h-10 text-white mx-auto mb-2 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-white font-bold text-lg tracking-wide">SOLD OUT</p>
+              <p className="text-white/70 text-xs mt-1">Currently Unavailable</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -262,7 +274,7 @@ export default function ProductCard({ product }) {
           />
         </div>
         {/* Mobile-always-visible WhatsApp button */}
-        <a
+        {!product.soldOut && (a
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
@@ -275,6 +287,15 @@ export default function ProductCard({ product }) {
           </svg>
           Order Now
         </a>
+        )}
+        {product.soldOut && (
+          <div className="sm:hidden flex items-center justify-center w-full py-2 mt-1 rounded-xl text-white text-[11px] font-semibold tracking-wide gap-2" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Sold Out
+          </div>
+        )}
       </div>
     </div>
     </>

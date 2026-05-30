@@ -21,7 +21,8 @@ export function ProductProvider({ children }) {
           ...p,
           name: p.name || "Unnamed",
           category: p.category || "other",
-          price: p.price || 0
+          price: p.price || 0,
+          soldOut: p.soldOut || false
         })) : [];
         setProducts(validated);
         setLoading(false);
@@ -57,7 +58,7 @@ export function ProductProvider({ children }) {
       })
       .then((saved) => {
         // Replace temp entry with server-assigned id
-        setProducts((prev) => prev.map((p) => (p.id === tempId ? { ...saved, name: saved.name || "Unnamed" } : p)));
+        setProducts((prev) => prev.map((p) => (p.id === tempId ? { ...saved, name: saved.name || "Unnamed", soldOut: saved.soldOut || false } : p)));
       })
       .catch((err) => {
         console.error("Add product error:", err);
@@ -88,7 +89,7 @@ export function ProductProvider({ children }) {
         return r.json();
       })
       .then((saved) => {
-        setProducts((prev) => prev.map((p) => (p.id === id ? { ...saved, name: saved.name || "Unnamed" } : p)));
+        setProducts((prev) => prev.map((p) => (p.id === id ? { ...saved, name: saved.name || "Unnamed", soldOut: saved.soldOut || false } : p)));
       })
       .catch((err) => {
         console.error("Update product error:", err);

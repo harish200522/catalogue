@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   price: "",
   quantity: "",
   images: [],
+  soldOut: false,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,6 +105,7 @@ export default function AdminPage() {
       price:    product.price,
       quantity: product.quantity,
       images:   product.images || (product.image ? [product.image] : []),
+      soldOut:  product.soldOut || false,
     });
     setEditingId(product.id);
     setErrors({});
@@ -327,6 +329,7 @@ export default function AdminPage() {
                         <th className="text-left px-5 py-3 text-[10px] uppercase tracking-widest text-gray-400 font-medium">Category</th>
                         <th className="text-left px-5 py-3 text-[10px] uppercase tracking-widest text-gray-400 font-medium">Price</th>
                         <th className="text-left px-5 py-3 text-[10px] uppercase tracking-widest text-gray-400 font-medium">MOQ</th>
+                        <th className="text-center px-5 py-3 text-[10px] uppercase tracking-widest text-gray-400 font-medium">Status</th>
                         <th className="text-right px-5 py-3 text-[10px] uppercase tracking-widest text-gray-400 font-medium">Actions</th>
                       </tr>
                     </thead>
@@ -371,6 +374,15 @@ export default function AdminPage() {
                           </td>
                           <td className="px-5 py-3 font-semibold text-gray-800">₹{p.price}</td>
                           <td className="px-5 py-3 text-gray-400 text-xs">{p.quantity}</td>
+                          <td className="px-5 py-3 text-center">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wide font-medium ${
+                              p.soldOut
+                                ? "bg-red-100 text-red-600"
+                                : "bg-green-100 text-green-600"
+                            }`}>
+                              {p.soldOut ? "Sold Out" : "Available"}
+                            </span>
+                          </td>
                           <td className="px-5 py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
@@ -450,6 +462,23 @@ export default function AdminPage() {
                         className={inputCls(errors.quantity)}
                       />
                     </Field>
+                  </div>
+
+                  {/* Sold Out Toggle */}
+                  <div className="flex items-center gap-3 px-3 py-3 rounded-lg border border-gray-200 bg-gray-50">
+                    <input
+                      type="checkbox"
+                      id="soldOut"
+                      checked={form.soldOut}
+                      onChange={(e) => setForm((f) => ({ ...f, soldOut: e.target.checked }))}
+                      className="w-4 h-4 rounded accent-red-500 cursor-pointer"
+                    />
+                    <label htmlFor="soldOut" className="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+                      Mark as Sold Out
+                    </label>
+                    <span className="text-xs text-gray-400">
+                      {form.soldOut ? "✓ This product will show as unavailable" : "Product is available"}
+                    </span>
                   </div>
 
                   {/* Image Upload */}
