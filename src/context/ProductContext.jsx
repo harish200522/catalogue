@@ -13,9 +13,13 @@ export function ProductProvider({ children }) {
 
   // ── Load all products from server on mount ───────────────────────────
   useEffect(() => {
-    fetch(`${API_BASE}/products`)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    fetch(`${API_BASE}/products`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
+        clearTimeout(timeoutId);
         // Ensure all products have required fields
         const validated = Array.isArray(data) ? data.map(p => ({
           ...p,
@@ -27,7 +31,16 @@ export function ProductProvider({ children }) {
         setProducts(validated);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        console.error("Failed to load products:", err.message);
+        setLoading(false);
+      });
+    
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // ── CRUD helpers — optimistic UI + server sync ───────────────────────
